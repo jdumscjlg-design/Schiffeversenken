@@ -13,7 +13,12 @@
       --hit: #ef4444;
       --ship: #475569;
       --sunk: #111827;
-      --grid-border: #334155;
+      --grid-border: #475569;
+      --label-color: #38bdf8;
+    }
+
+    * {
+      box-sizing: border-box;
     }
 
     body {
@@ -21,7 +26,7 @@
       background-color: var(--bg-color);
       color: var(--text);
       margin: 0;
-      padding: 12px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -31,7 +36,7 @@
 
     h1 {
       font-size: 1.2rem;
-      margin: 0 0 10px 0;
+      margin: 5px 0 10px 0;
       text-transform: uppercase;
       letter-spacing: 1px;
     }
@@ -41,36 +46,36 @@
       background-color: var(--card-bg);
       border: 1px solid var(--grid-border);
       border-radius: 8px;
-      padding: 10px 14px;
+      padding: 8px 12px;
       margin-bottom: 12px;
       width: 100%;
-      max-width: 400px;
-      box-sizing: border-box;
+      max-width: 420px;
     }
 
     .flotte-title {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       font-weight: bold;
       color: #94a3b8;
-      margin-bottom: 6px;
+      margin-bottom: 4px;
       text-transform: uppercase;
     }
 
     .flotte-list {
       display: flex;
       justify-content: space-between;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
+      font-weight: 600;
     }
 
     .flotte-item {
       display: flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
     }
 
     .board-container {
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       margin-bottom: 16px;
     }
 
@@ -81,23 +86,38 @@
       color: #94a3b8;
     }
 
-    .grid {
+    /* Raster mit Koordinaten-Labels (11x11 Grid) */
+    .grid-wrapper {
       display: grid;
-      grid-template-columns: repeat(10, 1fr);
+      grid-template-columns: 24px repeat(10, 1fr);
+      grid-template-rows: 24px repeat(10, 1fr);
       gap: 2px;
       background-color: var(--grid-border);
-      padding: 2px;
-      border-radius: 6px;
+      padding: 3px;
+      border-radius: 8px;
     }
 
-    .cell {
-      aspect-ratio: 1;
-      background-color: var(--card-bg);
-      border-radius: 2px;
+    /* Beschriftungen (A-J / 1-10) */
+    .label {
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 0.75rem;
+      font-weight: bold;
+      color: var(--label-color);
+      background-color: var(--bg-color);
+      border-radius: 2px;
+    }
+
+    /* Spielfeld-Zellen */
+    .cell {
+      aspect-ratio: 1;
+      background-color: var(--card-bg);
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.9rem;
       font-weight: bold;
       cursor: pointer;
       touch-action: manipulation;
@@ -105,8 +125,8 @@
 
     /* Zustände */
     .cell.ship {
-      background-color: var(--ship);
-      border: 1px solid #94a3b8;
+      background-color: #64748b;
+      border: 2px solid #cbd5e1;
       color: white;
     }
 
@@ -118,17 +138,19 @@
     .cell.hit {
       background-color: var(--hit);
       color: white;
+      font-size: 1.1rem;
     }
 
     .cell.sunk {
       background-color: var(--sunk);
       color: #ef4444;
       border: 1px solid #ef4444;
+      font-size: 1.1rem;
     }
 
     .legend {
       display: flex;
-      gap: 10px;
+      gap: 12px;
       font-size: 0.75rem;
       margin-bottom: 12px;
       flex-wrap: wrap;
@@ -142,19 +164,21 @@
     }
 
     .dot {
-      width: 10px;
-      height: 10px;
+      width: 12px;
+      height: 12px;
       border-radius: 2px;
     }
 
     .reset-btn {
-      margin-top: 8px;
-      padding: 10px 20px;
+      margin-top: 5px;
+      margin-bottom: 20px;
+      padding: 10px 24px;
       background-color: #334155;
       color: white;
-      border: none;
+      border: 1px solid var(--grid-border);
       border-radius: 6px;
       font-size: 0.85rem;
+      font-weight: bold;
       cursor: pointer;
     }
   </style>
@@ -174,7 +198,7 @@
   </div>
 
   <div class="legend">
-    <div class="legend-item"><div class="dot" style="background:#475569; border: 1px solid #94a3b8"></div> Schiff</div>
+    <div class="legend-item"><div class="dot" style="background:#64748b; border: 1px solid #cbd5e1"></div> Schiff</div>
     <div class="legend-item"><div class="dot" style="background:#0284c7"></div> Wasser</div>
     <div class="legend-item"><div class="dot" style="background:#ef4444"></div> Treffer</div>
     <div class="legend-item"><div class="dot" style="background:#111827; border: 1px solid #ef4444"></div> Versenkt</div>
@@ -183,95 +207,115 @@
   <!-- Spielfeld 1: Eigene Schüsse auf den Gegner -->
   <div class="board-container">
     <div class="board-title">🎯 MEINE SCHÜSSE (Gegner-Feld)</div>
-    <div class="grid" id="grid-enemy"></div>
+    <div class="grid-wrapper" id="grid-enemy"></div>
   </div>
 
   <!-- Spielfeld 2: Eigene Flotte -->
   <div class="board-container">
     <div class="board-title">🛡️ MEINE FLOTTE (Eigenes Feld)</div>
-    <div class="grid" id="grid-own"></div>
+    <div class="grid-wrapper" id="grid-own"></div>
   </div>
 
   <button class="reset-btn" onclick="resetBoards()">Neu starten</button>
 
   <script>
+    const columns = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J'];
+
     function createBoard(gridId) {
       const grid = document.getElementById(gridId);
       grid.innerHTML = '';
       
-      for (let i = 0; i < 100; i++) {
-        const cell = document.createElement('div');
-        cell.classList.add('cell');
-        cell.dataset.state = 'empty';
+      // 1. Ecke oben links (leer)
+      const emptyCorner = document.createElement('div');
+      emptyCorner.classList.add('label');
+      grid.appendChild(emptyCorner);
 
-        let pressTimer;
-        let isLongPress = false;
+      // 2. Spalten-Beschriftung (A bis J)
+      for (let c = 0; c < 10; c++) {
+        const colLabel = document.createElement('div');
+        colLabel.classList.add('label');
+        colLabel.innerText = columns[c];
+        grid.appendChild(colLabel);
+      }
 
-        // Lange Halten: Feld als Schiff (oder Versenkt) markieren
-        const startPress = (e) => {
-          isLongPress = false;
-          pressTimer = setTimeout(() => {
-            isLongPress = true;
+      // 3. Zeilen + Spielfeldzellen erstellen
+      for (let r = 1; r <= 10; r++) {
+        // Zeilen-Label (1 bis 10)
+        const rowLabel = document.createElement('div');
+        rowLabel.classList.add('label');
+        rowLabel.innerText = r;
+        grid.appendChild(rowLabel);
+
+        // 10 Felder pro Zeile
+        for (let c = 0; c < 10; c++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.dataset.state = 'empty';
+
+          let pressTimer;
+          let isLongPress = false;
+
+          // Lange Halten: Schiff / Versenkt markieren
+          const startPress = () => {
+            isLongPress = false;
+            pressTimer = setTimeout(() => {
+              isLongPress = true;
+              const currentState = cell.dataset.state;
+              
+              if (gridId === 'grid-own') {
+                if (currentState !== 'ship') {
+                  setState(cell, 'ship');
+                } else {
+                  setState(cell, 'empty');
+                }
+              } else {
+                if (currentState !== 'sunk') {
+                  setState(cell, 'sunk');
+                } else {
+                  setState(cell, 'empty');
+                }
+              }
+            }, 500);
+          };
+
+          const cancelPress = () => {
+            clearTimeout(pressTimer);
+          };
+
+          // Normaler Klick
+          const handleClick = () => {
+            clearTimeout(pressTimer);
+            if (isLongPress) return;
+
             const currentState = cell.dataset.state;
-            
-            // Im eigenen Feld setzt langes Drücken ein festes Schiff (Grau)
-            // Im Gegnerfeld setzt langes Drücken ein versenktes Schiffsfeld (Schwarz/Totenkopf)
-            if (gridId === 'grid-own') {
-              if (currentState !== 'ship') {
-                setState(cell, 'ship');
-              } else {
-                setState(cell, 'empty');
-              }
+
+            if (currentState === 'empty' || currentState === 'ship') {
+              setState(cell, 'water');
+            } else if (currentState === 'water') {
+              setState(cell, 'hit');
             } else {
-              if (currentState !== 'sunk') {
-                setState(cell, 'sunk');
-              } else {
-                setState(cell, 'empty');
-              }
+              setState(cell, 'empty');
             }
-          }, 500); // 0,5 Sekunden halten
-        };
+          };
 
-        const cancelPress = () => {
-          clearTimeout(pressTimer);
-        };
+          // Touch- und Maus-Events
+          cell.addEventListener('mousedown', startPress);
+          cell.addEventListener('touchstart', startPress, {passive: true});
+          
+          cell.addEventListener('mouseup', cancelPress);
+          cell.addEventListener('touchend', cancelPress);
+          cell.addEventListener('mouseleave', cancelPress);
 
-        // Normaler Klick
-        const handleClick = () => {
-          clearTimeout(pressTimer);
-          if (isLongPress) return; // Wenn es ein Long-Press war, nicht extra klicken
+          cell.addEventListener('click', handleClick);
 
-          const currentState = cell.dataset.state;
-
-          if (currentState === 'empty' || currentState === 'ship') {
-            // Aus Schiff oder Leer wird Wasser
-            setState(cell, 'water');
-          } else if (currentState === 'water') {
-            // Aus Wasser wird Treffer
-            setState(cell, 'hit');
-          } else {
-            // Aus Treffer/Versenkt zurück auf Leer
-            setState(cell, 'empty');
-          }
-        };
-
-        // Touch- und Maus-Events
-        cell.addEventListener('mousedown', startPress);
-        cell.addEventListener('touchstart', startPress, {passive: true});
-        
-        cell.addEventListener('mouseup', cancelPress);
-        cell.addEventListener('touchend', cancelPress);
-        cell.addEventListener('mouseleave', cancelPress);
-
-        cell.addEventListener('click', handleClick);
-
-        grid.appendChild(cell);
+          grid.appendChild(cell);
+        }
       }
     }
 
     function setState(cell, state) {
       cell.dataset.state = state;
-      cell.className = 'cell'; // Zurücksetzen der Klassen
+      cell.className = 'cell';
 
       if (state === 'ship') {
         cell.classList.add('ship');
@@ -297,7 +341,7 @@
       }
     }
 
-    // Spielfelder erstellen
+    // Spielfelder initialisieren
     createBoard('grid-enemy');
     createBoard('grid-own');
   </script>
