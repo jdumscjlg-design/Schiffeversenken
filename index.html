@@ -4,25 +4,189 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
   <title>Schiffe Versenken - Tracker</title>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    :root {
+      --bg-color: #0f172a;
+      --card-bg: #1e293b;
+      --text: #f8fafc;
+      --water: #0284c7;
+      --hit: #ef4444;
+      --ship: #475569;
+      --sunk: #111827;
+      --grid-border: #334155;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text);
+      margin: 0;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    h1 {
+      font-size: 1.2rem;
+      margin: 0 0 10px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* Schiffsübersicht */
+    .flotte-info {
+      background-color: var(--card-bg);
+      border: 1px solid var(--grid-border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 12px;
+      width: 100%;
+      max-width: 400px;
+      box-sizing: border-box;
+    }
+
+    .flotte-title {
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .flotte-list {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.8rem;
+    }
+
+    .flotte-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .board-container {
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 16px;
+    }
+
+    .board-title {
+      font-size: 0.85rem;
+      font-weight: bold;
+      margin-bottom: 6px;
+      color: #94a3b8;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 2px;
+      background-color: var(--grid-border);
+      padding: 2px;
+      border-radius: 6px;
+    }
+
+    .cell {
+      aspect-ratio: 1;
+      background-color: var(--card-bg);
+      border-radius: 2px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: bold;
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    /* Zustände */
+    .cell.ship {
+      background-color: var(--ship);
+      border: 1px solid #94a3b8;
+      color: white;
+    }
+
+    .cell.water {
+      background-color: var(--water);
+      color: white;
+    }
+
+    .cell.hit {
+      background-color: var(--hit);
+      color: white;
+    }
+
+    .cell.sunk {
+      background-color: var(--sunk);
+      color: #ef4444;
+      border: 1px solid #ef4444;
+    }
+
+    .legend {
+      display: flex;
+      gap: 10px;
+      font-size: 0.75rem;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 2px;
+    }
+
+    .reset-btn {
+      margin-top: 8px;
+      padding: 10px 20px;
+      background-color: #334155;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+  </style>
 </head>
 <body>
 
   <h1>🚢 Schiffe Versenken Tracker</h1>
 
-  <div class="legend">
-    <div class="legend-item"><div class="dot" style="background:#0284c7"></div> Wasser</div>
-    <div class="legend-item"><div class="dot" style="background:#ef4444"></div> Treffer</div>
-    <div class="legend-item"><div class="dot" style="background:#1f2937; border: 1px solid #ef4444"></div> Versenkt</div>
+  <!-- Übersicht Schiffsflotte -->
+  <div class="flotte-info">
+    <div class="flotte-title">⚓ Flotten-Übersicht</div>
+    <div class="flotte-list">
+      <div class="flotte-item">🚢 1x 5er</div>
+      <div class="flotte-item">🛳️ 2x 4er</div>
+      <div class="flotte-item">⛵ 3x 3er</div>
+    </div>
   </div>
 
-  <div style="height: 15px;"></div>
+  <div class="legend">
+    <div class="legend-item"><div class="dot" style="background:#475569; border: 1px solid #94a3b8"></div> Schiff</div>
+    <div class="legend-item"><div class="dot" style="background:#0284c7"></div> Wasser</div>
+    <div class="legend-item"><div class="dot" style="background:#ef4444"></div> Treffer</div>
+    <div class="legend-item"><div class="dot" style="background:#111827; border: 1px solid #ef4444"></div> Versenkt</div>
+  </div>
 
+  <!-- Spielfeld 1: Eigene Schüsse auf den Gegner -->
   <div class="board-container">
     <div class="board-title">🎯 MEINE SCHÜSSE (Gegner-Feld)</div>
     <div class="grid" id="grid-enemy"></div>
   </div>
 
+  <!-- Spielfeld 2: Eigene Flotte -->
   <div class="board-container">
     <div class="board-title">🛡️ MEINE FLOTTE (Eigenes Feld)</div>
     <div class="grid" id="grid-own"></div>
@@ -30,6 +194,112 @@
 
   <button class="reset-btn" onclick="resetBoards()">Neu starten</button>
 
-  <script src="script.js"></script>
+  <script>
+    function createBoard(gridId) {
+      const grid = document.getElementById(gridId);
+      grid.innerHTML = '';
+      
+      for (let i = 0; i < 100; i++) {
+        const cell = document.createElement('div');
+        cell.classList.add('cell');
+        cell.dataset.state = 'empty';
+
+        let pressTimer;
+        let isLongPress = false;
+
+        // Lange Halten: Feld als Schiff (oder Versenkt) markieren
+        const startPress = (e) => {
+          isLongPress = false;
+          pressTimer = setTimeout(() => {
+            isLongPress = true;
+            const currentState = cell.dataset.state;
+            
+            // Im eigenen Feld setzt langes Drücken ein festes Schiff (Grau)
+            // Im Gegnerfeld setzt langes Drücken ein versenktes Schiffsfeld (Schwarz/Totenkopf)
+            if (gridId === 'grid-own') {
+              if (currentState !== 'ship') {
+                setState(cell, 'ship');
+              } else {
+                setState(cell, 'empty');
+              }
+            } else {
+              if (currentState !== 'sunk') {
+                setState(cell, 'sunk');
+              } else {
+                setState(cell, 'empty');
+              }
+            }
+          }, 500); // 0,5 Sekunden halten
+        };
+
+        const cancelPress = () => {
+          clearTimeout(pressTimer);
+        };
+
+        // Normaler Klick
+        const handleClick = () => {
+          clearTimeout(pressTimer);
+          if (isLongPress) return; // Wenn es ein Long-Press war, nicht extra klicken
+
+          const currentState = cell.dataset.state;
+
+          if (currentState === 'empty' || currentState === 'ship') {
+            // Aus Schiff oder Leer wird Wasser
+            setState(cell, 'water');
+          } else if (currentState === 'water') {
+            // Aus Wasser wird Treffer
+            setState(cell, 'hit');
+          } else {
+            // Aus Treffer/Versenkt zurück auf Leer
+            setState(cell, 'empty');
+          }
+        };
+
+        // Touch- und Maus-Events
+        cell.addEventListener('mousedown', startPress);
+        cell.addEventListener('touchstart', startPress, {passive: true});
+        
+        cell.addEventListener('mouseup', cancelPress);
+        cell.addEventListener('touchend', cancelPress);
+        cell.addEventListener('mouseleave', cancelPress);
+
+        cell.addEventListener('click', handleClick);
+
+        grid.appendChild(cell);
+      }
+    }
+
+    function setState(cell, state) {
+      cell.dataset.state = state;
+      cell.className = 'cell'; // Zurücksetzen der Klassen
+
+      if (state === 'ship') {
+        cell.classList.add('ship');
+        cell.innerText = '■';
+      } else if (state === 'water') {
+        cell.classList.add('water');
+        cell.innerText = '~';
+      } else if (state === 'hit') {
+        cell.classList.add('hit');
+        cell.innerText = '✕';
+      } else if (state === 'sunk') {
+        cell.classList.add('sunk');
+        cell.innerText = '☠';
+      } else {
+        cell.innerText = '';
+      }
+    }
+
+    function resetBoards() {
+      if (confirm('Spielfelder wirklich zurücksetzen?')) {
+        createBoard('grid-enemy');
+        createBoard('grid-own');
+      }
+    }
+
+    // Spielfelder erstellen
+    createBoard('grid-enemy');
+    createBoard('grid-own');
+  </script>
 </body>
 </html>
