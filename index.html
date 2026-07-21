@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Schiffe Versenken - Tracker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <h1>🚢 Schiffe Versenken Tracker</h1>
+
+  <div class="legend">
+    <div class="legend-item"><div class="dot" style="background:#0284c7"></div> Wasser</div>
+    <div class="legend-item"><div class="dot" style="background:#ef4444"></div> Treffer</div>
+    <div class="legend-item"><div class="dot" style="background:#1f2937; border: 1px solid #ef4444"></div> Versenkt</div>
+  </div>
+
+  <div style="height: 15px;"></div>
+
+  <div class="board-container">
+    <div class="board-title">🎯 MEINE SCHÜSSE (Gegner-Feld)</div>
+    <div class="grid" id="grid-enemy"></div>
+  </div>
+
+  <div class="board-container">
+    <div class="board-title">🛡️ MEINE FLOTTE (Eigenes Feld)</div>
+    <div class="grid" id="grid-own"></div>
+  </div>
+
+  <button class="reset-btn" onclick="resetBoards()">Neu starten</button>
+
+  <script src="script.js"></script>
+</body>
+</html>
